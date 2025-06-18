@@ -1,6 +1,11 @@
-APP_NAME=lexia
-MAIN=./main.go
-BUILD_DIR=bin
+APP_NAME = lexia
+MAIN = ./main.go
+BUILD_DIR = bin
+
+include .env.development
+
+test:
+	echo ${DB_CONNECTION_STRING}
 
 run:
 	go run $(MAIN)
@@ -17,6 +22,28 @@ docker-dev:
 
 schemagen:
 	go generate ./ent
+
+migration-status:
+	atlas migrate status \
+		--dir "file://ent/migrate/migrations" \
+		--url ${DB_CONNECTION_URL}
+
+migration-apply:
+	atlas migrate apply \
+		--dir "file://ent/migrate/migrations" \
+		--url ${DB_CONNECTION_URL}
+
+migration-create:
+	atlas migrate diff migration_name \
+		--dir "file://ent/migrate/migrations" \
+		--to "ent://ent/schema" \
+		--dev-url "docker://postgres/15/test?search_path=public"
+
+migrate-lint:
+	atlas migrate lint \
+		--dev-url="docker://postgres/15/test?search_path=public" \
+		--dir="file://ent/migrate/migrations" \
+		--latest=1
 
 help:
 	@echo "Usage:"
