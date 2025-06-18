@@ -15,6 +15,9 @@ clean:
 docker-dev:
 	docker-compose -f docker-compose.development.yaml up
 
+schemagen:
+	go generate ./ent
+
 help:
 	@echo "Usage:"
 	@echo "  make run        Run the backup service"
