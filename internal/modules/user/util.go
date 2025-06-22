@@ -1,22 +1,16 @@
 package user
 
 import (
-	"github.com/asaskevich/govalidator"
-	"github.com/kume1a/sonifybackend/internal/database"
-	"github.com/kume1a/sonifybackend/internal/shared"
+	"lexia/ent/schema"
+	"lexia/internal/modules/user"
 )
 
-func UserEntityToDto(userEntity *database.User) shared.UserDto {
-	return shared.UserDto{
-		ID:           userEntity.ID,
+func UserEntityToDto(userEntity *schema.User) user.UserDto {
+	return user.UserDto{
+		ID:           userEntity.,
 		CreatedAt:    userEntity.CreatedAt,
 		Name:         userEntity.Name.String,
 		Email:        userEntity.Email.String,
 		AuthProvider: userEntity.AuthProvider,
 	}
-}
-
-func (dto updateUserDTO) Validate() error {
-	_, err := govalidator.ValidateStruct(dto)
-	return err
 }
