@@ -1,9 +1,10 @@
 package modules
 
 import (
-	"lexia/internal/config"
 	"lexia/internal/logger"
 	"lexia/internal/modules/auth"
+	"lexia/internal/modules/user"
+	"lexia/internal/shared"
 
 	"net/http"
 
@@ -14,29 +15,23 @@ func HealthcheckHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "healthy"})
 }
 
-func CreateWebserverRouter() error {
-	envVars, err := config.ParseEnv()
+func CreateWebserver(apiCfg *shared.ApiConfig) (*gin.Engine, error) {
+	envVars, err := shared.ParseEnv()
 	if err != nil {
 		logger.Fatal("Failed to parse environment variables: ", err)
-		return err
+		return nil, err
 	}
 
 	r := gin.Default()
 
-	// healthcheck
 	r.GET("/", HealthcheckHandler)
 
-	// auth
-	r.POST("/auth/signIn", auth.LoginHandler)
+	r = auth.Router(apiCfg, r)
+	r = user.Router(apiCfg, r)
 
 	if envVars.IsProduction {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	if err := r.Run(); err != nil {
-		logger.Fatal("Failed to start HTTP server: ", err)
-		return err
-	}
-
-	return nil
+	return r, nil
 }

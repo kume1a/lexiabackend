@@ -1,4 +1,4 @@
-package shared
+package schema
 
 type Language string
 

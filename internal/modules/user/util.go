@@ -1,16 +1,14 @@
 package user
 
 import (
-	"lexia/ent/schema"
-	"lexia/internal/modules/user"
+	"lexia/ent"
 )
 
-func UserEntityToDto(userEntity *schema.User) user.UserDto {
-	return user.UserDto{
-		ID:           userEntity.,
-		CreatedAt:    userEntity.CreatedAt,
-		Name:         userEntity.Name.String,
-		Email:        userEntity.Email.String,
-		AuthProvider: userEntity.AuthProvider,
+func UserEntityToDto(userEntity *ent.User) UserDto {
+	return UserDto{
+		ID:        userEntity.ID,
+		CreatedAt: userEntity.CreateTime,
+		Name:      userEntity.Username,
+		Email:     userEntity.Email,
 	}
 }

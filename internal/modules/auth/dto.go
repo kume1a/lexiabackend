@@ -1,24 +1,19 @@
 package auth
 
-import (
-	"time"
-
-	"github.com/google/uuid"
-)
-
-type UserDto struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"createdAt"`
-	Username  string    `json:"name"`
-	Email     string    `json:"email"`
-}
+import "lexia/internal/modules/user"
 
 type tokenPayloadDTO struct {
-	AccessToken string  `json:"accessToken"`
-	User        UserDto `json:"user"`
+	AccessToken string       `json:"accessToken"`
+	User        user.UserDto `json:"user"`
 }
 
 type emailSignInDTO struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type EmailSignUpDTO struct {
+	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }

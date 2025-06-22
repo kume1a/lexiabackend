@@ -1,22 +1,12 @@
 package auth
 
 import (
-	"github.com/asaskevich/govalidator"
-	"github.com/kume1a/sonifybackend/internal/database"
-	"github.com/kume1a/sonifybackend/internal/modules/user"
-	"github.com/kume1a/sonifybackend/internal/shared"
+	"lexia/ent"
+	"lexia/internal/modules/user"
+	"lexia/internal/shared"
+
 	"golang.org/x/crypto/bcrypt"
 )
-
-func (dto *googleSignInDTO) Validate() error {
-	_, err := govalidator.ValidateStruct(dto)
-	return err
-}
-
-func (dto *emailSignInDTO) Validate() error {
-	_, err := govalidator.ValidateStruct(dto)
-	return err
-}
 
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
@@ -28,10 +18,13 @@ func ComparePasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func getTokenPayloadDtoFromUserEntity(userEntity *database.User) (*tokenPayloadDTO, error) {
-	accessToken, err := shared.GenerateAccessToken(&shared.TokenClaims{
-		UserID: userEntity.ID,
-		Email:  userEntity.Email.String})
+func getTokenPayloadDtoFromUserEntity(userEntity *ent.User) (*tokenPayloadDTO, error) {
+	accessToken, err := shared.GenerateAccessToken(
+		&shared.TokenClaims{
+			UserID: userEntity.ID,
+			Email:  userEntity.Email,
+		},
+	)
 
 	if err != nil {
 		return nil, err

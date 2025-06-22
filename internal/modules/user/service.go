@@ -2,18 +2,29 @@ package user
 
 import (
 	"context"
+	"lexia/ent"
+	"lexia/ent/user"
 	"log"
 
-	"entgo.io/ent"
 	"github.com/google/uuid"
 )
 
-func CreateUser(ctx context.Context, client *ent.Client, username, email, password string) (*ent.User, error) {
-	newUser, err := client.User.Create().
+type CreateUserArgs struct {
+	Username string
+	Email    string
+	Password string
+}
+
+func CreateUser(
+	ctx context.Context,
+	db *ent.Client,
+	args CreateUserArgs,
+) (*ent.User, error) {
+	newUser, err := db.User.Create().
 		SetID(uuid.New()).
-		SetUsername(username).
-		SetEmail(email).
-		SetPassword(password).
+		SetUsername(args.Username).
+		SetEmail(args.Email).
+		SetPassword(args.Password).
 		Save(ctx)
 
 	if err != nil {
@@ -24,41 +35,55 @@ func CreateUser(ctx context.Context, client *ent.Client, username, email, passwo
 	return newUser, nil
 }
 
-func GetUserByID(ctx context.Context, client *ent.Client, userID uuid.UUID) (*ent.User, error) {
-	user, err := client.User.Get(ctx, userID)
+func GetUserByID(
+	ctx context.Context,
+	db *ent.Client,
+	ID uuid.UUID,
+) (*ent.User, error) {
+	user, err := db.User.Get(ctx, ID)
 
 	if ent.IsNotFound(err) {
-		return nil, shared.NotFound(shared.ErrUserNotFound)
+		log.Println("User not found with ID: ", ID)
+		return nil, err
 	}
 
 	if err != nil {
 		log.Println("Error getting user by ID: ", err)
-		return nil, shared.InternalServerErrorDef()
+		return nil, err
 	}
 
 	return user, nil
 }
 
-func GetUserByEmail(ctx context.Context, client *ent.Client, email string) (*ent.User, error) {
-	user, err := client.User.Query().
+func GetUserByEmail(
+	ctx context.Context,
+	db *ent.Client,
+	email string,
+) (*ent.User, error) {
+	user, err := db.User.Query().
 		Where(user.EmailEQ(email)).
 		Only(ctx)
 
-	if ent.IsNotFound(err) {
-		return nil, shared.NotFound(shared.ErrUserNotFound)
-	}
-
 	if err != nil {
 		log.Println("Error getting user by email: ", err)
-		return nil, shared.InternalServerErrorDef()
+		return nil, err
 	}
 
 	return user, nil
 }
 
-func UpdateUser(ctx context.Context, client *ent.Client, userID uuid.UUID, username string) (*ent.User, error) {
-	updatedUser, err := client.User.UpdateOneID(userID).
-		SetUsername(username).
+type UpdateUserByIDArgs struct {
+	UserID   uuid.UUID
+	Username string
+}
+
+func UpdateUserByID(
+	ctx context.Context,
+	db *ent.Client,
+	args UpdateUserByIDArgs,
+) (*ent.User, error) {
+	updatedUser, err := db.User.UpdateOneID(args.UserID).
+		SetUsername(args.Username).
 		Save(ctx)
 
 	if err != nil {
@@ -69,8 +94,12 @@ func UpdateUser(ctx context.Context, client *ent.Client, userID uuid.UUID, usern
 	return updatedUser, nil
 }
 
-func UserExistsByEmail(ctx context.Context, client *ent.Client, email string) (bool, error) {
-	count, err := client.User.Query().
+func UserExistsByEmail(
+	ctx context.Context,
+	db *ent.Client,
+	email string,
+) (bool, error) {
+	count, err := db.User.Query().
 		Where(user.EmailEQ(email)).
 		Count(ctx)
 

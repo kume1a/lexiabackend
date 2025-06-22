@@ -1,58 +1,58 @@
 package user
 
 import (
-	"database/sql"
-	"log"
 	"net/http"
 
-	"github.com/kume1a/sonifybackend/internal/config"
-	"github.com/kume1a/sonifybackend/internal/database"
-	"github.com/kume1a/sonifybackend/internal/shared"
+	"lexia/internal/shared"
+
+	"github.com/gin-gonic/gin"
 )
 
-func handleUpdateUser(apiCfg *config.ApiConfig) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		tokenPayload, err := shared.GetAuthPayload(r)
+func handleUpdateUser(apiCfg *shared.ApiConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authPayload, err := shared.GetAuthPayload(c)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(c, err.Error())
 			return
 		}
 
-		body, err := shared.ValidateRequestBody[*updateUserDTO](r)
-		if err != nil {
-			shared.ResBadRequest(w, err.Error())
+		var body updateUserDTO
+		if err := c.ShouldBindJSON(&body); err != nil {
+			shared.ResBadRequest(c, err.Error())
 			return
 		}
 
-		user, err := UpdateUser(r.Context(), apiCfg.DB, &database.UpdateUserParams{
-			Name: sql.NullString{String: body.Name, Valid: body.Name != ""},
-			ID:   tokenPayload.UserID,
-		})
+		user, err := UpdateUserByID(
+			c.Request.Context(), apiCfg.DB,
+			UpdateUserByIDArgs{
+				Username: body.Name,
+				UserID:   authPayload.UserID,
+			},
+		)
 
 		if err != nil {
-			log.Println(err)
-			shared.ResInternalServerErrorDef(w)
+			shared.ResInternalServerErrorDef(c)
 			return
 		}
 
-		shared.ResOK(w, UserEntityToDto(user))
+		shared.ResOK(c, UserEntityToDto(user))
 	}
 }
 
-func handleGetAuthUser(apiCfg *config.ApiConfig) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		tokenPayload, err := shared.GetAuthPayload(r)
+func handleGetAuthUser(apiCfg *shared.ApiConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authPayload, err := shared.GetAuthPayload(c)
 		if err != nil {
-			shared.ResUnauthorized(w, err.Error())
+			shared.ResUnauthorized(c, err.Error())
 			return
 		}
 
-		user, err := GetUserByID(r.Context(), apiCfg.DB, tokenPayload.UserID)
+		user, err := GetUserByID(c.Request.Context(), apiCfg.DB, authPayload.UserID)
 		if err != nil {
-			shared.ResNotFound(w, shared.ErrUserNotFound)
+			shared.ResNotFound(c, shared.ErrUserNotFound)
 			return
 		}
 
-		shared.ResOK(w, UserEntityToDto(user))
+		c.JSON(http.StatusOK, UserEntityToDto(user))
 	}
 }

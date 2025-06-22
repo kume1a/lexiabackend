@@ -1,7 +1,9 @@
-package config
+package shared
+
+import "lexia/ent"
 
 type ResourceConfig struct {
-	// DB         *...DB
+	DB *ent.Client
 }
 
 type ApiConfig struct {

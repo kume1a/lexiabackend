@@ -1,8 +1,6 @@
 package schema
 
 import (
-	"lexia/internal/shared"
-
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -21,7 +19,7 @@ func (Folder) Fields() []ent.Field {
 		field.String("name").
 			NotEmpty(),
 		field.Int32("wordCount"),
-		field.Enum("languageFrom").GoType(shared.Language("")),
+		field.Enum("languageFrom").GoType(Language("")),
 	}
 }
 

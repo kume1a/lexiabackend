@@ -1,17 +1,16 @@
 package auth
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/kume1a/sonifybackend/internal/config"
+	"lexia/internal/shared"
+
+	"github.com/gin-gonic/gin"
 )
 
-func Router(apiCfg *config.ApiConfig, router *mux.Router) *mux.Router {
-	r := router.PathPrefix("/auth").Subrouter()
+func Router(apiCfg *shared.ApiConfig, r *gin.Engine) *gin.Engine {
+	r.GET("/auth/status", handleGetAuthStatus())
 
-	r.HandleFunc("/status", handleGetAuthStatus()).Methods("GET")
-
-	r.HandleFunc("/googleSignIn", handleGoogleAuth(apiCfg)).Methods("POST")
-	r.HandleFunc("/emailSignIn", handleEmailAuth(apiCfg)).Methods("POST")
+	r.PUT("/auth/emailSignIn", handleEmailSignIn(apiCfg))
+	r.GET("/auth/emailSignUp", handleEmailSignUp(apiCfg))
 
 	return r
 }

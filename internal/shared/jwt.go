@@ -2,7 +2,6 @@ package shared
 
 import (
 	"errors"
-	"lexia/internal/config"
 	"log"
 	"time"
 
@@ -16,7 +15,7 @@ type TokenClaims struct {
 }
 
 func GenerateAccessToken(tokenClaims *TokenClaims) (string, error) {
-	env, err := config.ParseEnv()
+	env, err := ParseEnv()
 	if err != nil {
 		return "", err
 	}
@@ -25,7 +24,7 @@ func GenerateAccessToken(tokenClaims *TokenClaims) (string, error) {
 }
 
 func VerifyAccessToken(tokenString string) (*TokenClaims, error) {
-	env, err := config.ParseEnv()
+	env, err := ParseEnv()
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +78,7 @@ func verifyJWT(tokenString string, secretKey string) (*TokenClaims, error) {
 }
 
 func generateJWT(tokenClaims *TokenClaims, secretKey string) (string, error) {
-	env, err := config.ParseEnv()
+	env, err := ParseEnv()
 	if err != nil {
 		return "", err
 	}

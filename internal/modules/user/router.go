@@ -1,16 +1,14 @@
 package user
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/kume1a/sonifybackend/internal/config"
-	"github.com/kume1a/sonifybackend/internal/shared"
+	"lexia/internal/shared"
+
+	"github.com/gin-gonic/gin"
 )
 
-func Router(apiCfg *config.ApiConfig, router *mux.Router) *mux.Router {
-	r := router.PathPrefix("/users").Subrouter()
+func Router(apiCfg *shared.ApiConfig, router *gin.Engine) *gin.Engine {
+	router.PUT("/user", handleUpdateUser(apiCfg))
+	router.GET("/user/auth", handleGetAuthUser(apiCfg))
 
-	r.HandleFunc("/updateMe", shared.AuthMW(handleUpdateUser(apiCfg))).Methods("PATCH")
-	r.HandleFunc("/authUser", shared.AuthMW(handleGetAuthUser(apiCfg))).Methods("GET")
-
-	return r
+	return router
 }

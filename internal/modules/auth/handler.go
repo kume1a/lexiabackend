@@ -1,52 +1,56 @@
 package auth
 
 import (
-	"net/http"
+	"lexia/internal/shared"
 
-	"github.com/kume1a/sonifybackend/internal/config"
-	"github.com/kume1a/sonifybackend/internal/shared"
+	"github.com/gin-gonic/gin"
 )
 
-func handleGetAuthStatus() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		shared.ResOK(w, shared.OkDTO{Ok: true})
+func handleGetAuthStatus() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		shared.ResOK(c, shared.OkDTO{Ok: true})
 	}
 }
 
-func handleGoogleAuth(apiCfg *config.ApiConfig) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := shared.ValidateRequestBody[*googleSignInDTO](r)
-
-		if err != nil {
-			shared.ResBadRequest(w, err.Error())
+func handleEmailSignIn(apiCfg *shared.ApiConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var body emailSignInDTO
+		if err := c.ShouldBindJSON(&body); err != nil {
+			shared.ResBadRequest(c, err.Error())
 			return
 		}
 
-		tokenPayload, httpErr := AuthWithGoogle(*apiCfg, r.Context(), body.Token)
+		tokenPayload, httpErr := SignInWithEmail(apiCfg, c.Request.Context(), SignInWithEmailArgs{
+			Email:    body.Email,
+			Password: body.Password,
+		})
 		if httpErr != nil {
-			shared.ResHttpError(w, httpErr)
+			shared.ResHttpError(c, httpErr)
 			return
 		}
 
-		shared.ResOK(w, tokenPayload)
+		shared.ResOK(c, tokenPayload)
 	}
 }
 
-func handleEmailAuth(apiCfg *config.ApiConfig) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := shared.ValidateRequestBody[*emailSignInDTO](r)
-
-		if err != nil {
-			shared.ResBadRequest(w, err.Error())
+func handleEmailSignUp(apiCfg *shared.ApiConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var body EmailSignUpDTO
+		if err := c.ShouldBindJSON(&body); err != nil {
+			shared.ResBadRequest(c, err.Error())
 			return
 		}
 
-		tokenPayload, httpErr := AuthWithEmail(*apiCfg, r.Context(), body.Email, body.Password)
+		tokenPayload, httpErr := SignUpWithEmail(apiCfg, c.Request.Context(), SignUpWithEmailArgs{
+			Username: body.Username,
+			Email:    body.Email,
+			Password: body.Password,
+		})
 		if httpErr != nil {
-			shared.ResHttpError(w, httpErr)
+			shared.ResHttpError(c, httpErr)
 			return
 		}
 
-		shared.ResOK(w, tokenPayload)
+		shared.ResOK(c, tokenPayload)
 	}
 }
