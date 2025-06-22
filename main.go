@@ -1,9 +1,9 @@
 package main
 
 import (
-	"lexia/internal/config"
 	"lexia/internal/logger"
 	"lexia/internal/modules"
+	"lexia/internal/shared"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,18 +11,18 @@ import (
 )
 
 func main() {
-	config.LoadEnv()
+	shared.LoadEnv()
 
-	db, err := config.InitializeDatabase()
+	db, err := shared.InitializeDatabase()
 	if err != nil {
 		panic(err)
 	}
 
-	resouceConfig := &config.ResourceConfig{
+	resouceConfig := &shared.ResourceConfig{
 		DB: db,
 	}
 
-	apiCfg := config.ApiConfig{
+	apiCfg := shared.ApiConfig{
 		ResourceConfig: resouceConfig,
 	}
 

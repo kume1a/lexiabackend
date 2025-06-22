@@ -7,3 +7,4 @@ ent/*
 !ent/schema/*
 !ent/migrate/
 !ent/migrate/*
+!ent/generate.go
