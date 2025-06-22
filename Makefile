@@ -34,7 +34,7 @@ migration-apply:
 		--url ${DB_CONNECTION_URL}
 
 migration-create:
-	atlas migrate diff migration_name \
+	atlas migrate diff init \
 		--dir "file://ent/migrate/migrations" \
 		--to "ent://ent/schema" \
 		--dev-url "docker://postgres/15/test?search_path=public"
