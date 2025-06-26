@@ -19,8 +19,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    # env_file:
-    #   - .env.docker
 
   snapkeepredis:
     image: redis:7-alpine
@@ -37,8 +35,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    # env_file:
-    #   - .env.docker
 
   snapkeep:
     build: .

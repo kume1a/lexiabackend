@@ -6,11 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Router(apiCfg *shared.ApiConfig, r *gin.Engine) *gin.Engine {
-	r.GET("/auth/status", handleGetAuthStatus())
-
-	r.PUT("/auth/emailSignIn", handleEmailSignIn(apiCfg))
-	r.GET("/auth/emailSignUp", handleEmailSignUp(apiCfg))
-
-	return r
+func Router(apiCfg *shared.ApiConfig, rg *gin.RouterGroup) {
+	authGroup := rg.Group("/auth")
+	{
+		authGroup.GET("/status", handleGetAuthStatus())
+		authGroup.POST("/signin", handleEmailSignIn(apiCfg))
+		authGroup.POST("/signup", handleEmailSignUp(apiCfg))
+	}
 }

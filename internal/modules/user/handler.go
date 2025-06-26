@@ -1,8 +1,6 @@
 package user
 
 import (
-	"net/http"
-
 	"lexia/internal/shared"
 
 	"github.com/gin-gonic/gin"
@@ -17,15 +15,15 @@ func handleUpdateUser(apiCfg *shared.ApiConfig) gin.HandlerFunc {
 		}
 
 		var body updateUserDTO
-		if err := c.ShouldBindJSON(&body); err != nil {
-			shared.ResBadRequest(c, err.Error())
+		if validationErr := shared.BindAndValidate(c, &body); validationErr != nil {
+			shared.ResValidationError(c, validationErr)
 			return
 		}
 
 		user, err := UpdateUserByID(
 			c.Request.Context(), apiCfg.DB,
 			UpdateUserByIDArgs{
-				Username: body.Name,
+				Username: body.Username,
 				UserID:   authPayload.UserID,
 			},
 		)
@@ -53,6 +51,6 @@ func handleGetAuthUser(apiCfg *shared.ApiConfig) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, UserEntityToDto(user))
+		shared.ResOK(c, UserEntityToDto(user))
 	}
 }

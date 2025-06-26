@@ -7,12 +7,12 @@ import (
 )
 
 type updateUserDTO struct {
-	Name string `json:"name" valid:"optional"`
+	Username string `json:"username" validate:"username" binding:"required,min=2,max=50,alphanum"`
 }
 
 type UserDto struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"createdAt"`
-	Name      string    `json:"name"`
+	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 }

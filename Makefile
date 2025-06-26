@@ -8,7 +8,7 @@ test:
 	echo ${DB_CONNECTION_STRING}
 
 run:
-	go run $(MAIN)
+	air
 
 build:
 	mkdir -p $(BUILD_DIR)

@@ -8,7 +8,7 @@ func UserEntityToDto(userEntity *ent.User) UserDto {
 	return UserDto{
 		ID:        userEntity.ID,
 		CreatedAt: userEntity.CreateTime,
-		Name:      userEntity.Username,
+		Username:  userEntity.Username,
 		Email:     userEntity.Email,
 	}
 }

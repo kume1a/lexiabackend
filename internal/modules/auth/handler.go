@@ -15,8 +15,8 @@ func handleGetAuthStatus() gin.HandlerFunc {
 func handleEmailSignIn(apiCfg *shared.ApiConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body emailSignInDTO
-		if err := c.ShouldBindJSON(&body); err != nil {
-			shared.ResBadRequest(c, err.Error())
+		if validationErr := shared.BindAndValidate(c, &body); validationErr != nil {
+			shared.ResValidationError(c, validationErr)
 			return
 		}
 
@@ -36,8 +36,8 @@ func handleEmailSignIn(apiCfg *shared.ApiConfig) gin.HandlerFunc {
 func handleEmailSignUp(apiCfg *shared.ApiConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var body EmailSignUpDTO
-		if err := c.ShouldBindJSON(&body); err != nil {
-			shared.ResBadRequest(c, err.Error())
+		if validationErr := shared.BindAndValidate(c, &body); validationErr != nil {
+			shared.ResValidationError(c, validationErr)
 			return
 		}
 
