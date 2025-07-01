@@ -8,3 +8,7 @@ ent/*
 !ent/migrate/
 !ent/migrate/*
 !ent/generate.go
+
+temp
+lexia.exe
+lexia
