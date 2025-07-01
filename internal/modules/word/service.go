@@ -122,6 +122,7 @@ func GetWordsByFolderID(
 
 	words, err := db.Word.Query().
 		Where(word.HasFolderWith(folder.ID(folderID))).
+		WithFolder().
 		All(ctx)
 
 	if err != nil {
