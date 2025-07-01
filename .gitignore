@@ -10,5 +10,6 @@ ent/*
 !ent/generate.go
 
 temp
+tmp
 lexia.exe
 lexia
