@@ -73,7 +73,17 @@ func CreateFolder(ctx context.Context, db *ent.Client, args CreateFolderArgs) (*
 		mutation = mutation.AddParentIDs(*args.ParentID)
 	}
 
-	return mutation.Save(ctx)
+	createdFolder, err := mutation.Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return db.Folder.Query().
+		Where(folder.ID(createdFolder.ID)).
+		WithParent().
+		WithSubfolders().
+		WithWords().
+		Only(ctx)
 }
 
 func GetFolderByID(ctx context.Context, db *ent.Client, folderID uuid.UUID, userID uuid.UUID) (*ent.Folder, error) {
@@ -142,7 +152,17 @@ func UpdateFolder(ctx context.Context, db *ent.Client, args UpdateFolderArgs) (*
 		mutation = mutation.ClearParent().AddParentIDs(*args.ParentID)
 	}
 
-	return mutation.Save(ctx)
+	updatedFolder, err := mutation.Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return db.Folder.Query().
+		Where(folder.ID(updatedFolder.ID)).
+		WithParent().
+		WithSubfolders().
+		WithWords().
+		Only(ctx)
 }
 
 func DeleteFolder(ctx context.Context, db *ent.Client, folderID uuid.UUID, userID uuid.UUID) error {
@@ -193,7 +213,17 @@ func MoveFolder(ctx context.Context, db *ent.Client, folderID uuid.UUID, newPare
 		mutation = mutation.AddParentIDs(*newParentID)
 	}
 
-	return mutation.Save(ctx)
+	movedFolder, err := mutation.Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return db.Folder.Query().
+		Where(folder.ID(movedFolder.ID)).
+		WithParent().
+		WithSubfolders().
+		WithWords().
+		Only(ctx)
 }
 
 func validateParentChange(ctx context.Context, db *ent.Client, folderID uuid.UUID, newParentID uuid.UUID, userID uuid.UUID) error {
