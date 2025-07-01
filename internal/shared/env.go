@@ -10,8 +10,16 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const (
+	EnvEnvironment           = "ENVIRONMENT"
+	EnvPort                  = "PORT"
+	EnvDbConnectionString    = "DB_CONNECTION_STRING"
+	EnvAccessTokenSecret     = "ACCESS_TOKEN_SECRET"
+	EnvAccessTokenExpSeconds = "ACCESS_TOKEN_EXP_SECONDS"
+)
+
 func LoadEnv() {
-	env := os.Getenv("ENVIRONMENT")
+	env := os.Getenv(EnvEnvironment)
 	if env == "" {
 		env = "development"
 	}
@@ -35,27 +43,27 @@ type EnvVariables struct {
 }
 
 func ParseEnv() (*EnvVariables, error) {
-	environment, err := getEnv("ENVIRONMENT")
+	environment, err := getEnv(EnvEnvironment)
 	if err != nil {
 		return nil, err
 	}
 
-	port, err := getEnv("PORT")
+	port, err := getEnv(EnvPort)
 	if err != nil {
 		return nil, err
 	}
 
-	dbConnectionString, err := getEnv("DB_CONNECTION_STRING")
+	dbConnectionString, err := getEnv(EnvDbConnectionString)
 	if err != nil {
 		return nil, err
 	}
 
-	accessTokenSecret, err := getEnv("ACCESS_TOKEN_SECRET")
+	accessTokenSecret, err := getEnv(EnvAccessTokenSecret)
 	if err != nil {
 		return nil, err
 	}
 
-	accessTokenExpSeconds, err := getEnvInt("ACCESS_TOKEN_EXP_SECONDS")
+	accessTokenExpSeconds, err := getEnvInt(EnvAccessTokenExpSeconds)
 	if err != nil {
 		return nil, err
 	}

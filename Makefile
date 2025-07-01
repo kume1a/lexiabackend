@@ -47,7 +47,23 @@ migrate-lint:
 
 help:
 	@echo "Usage:"
-	@echo "  make run        Run the backup service"
-	@echo "  make build      Build the binary"
-	@echo "  make clean      Clean up tmp files and binaries"
-	@echo "  make docker-dev Run the development Docker Compose file"
+	@echo "  make run              Run the backup service"
+	@echo "  make build            Build the binary"
+	@echo "  make clean            Clean up tmp files and binaries"
+	@echo "  make docker-dev       Run the development Docker Compose file"
+	@echo "  make test-e2e         Run all end-to-end tests"
+	@echo "  make test-e2e-race    Run e2e tests with race detection"
+	@echo "  make test-e2e-coverage Run e2e tests with coverage"
+
+# E2E Testing targets
+test-e2e:
+	@echo "Running all E2E tests..."
+	go test -v ./test/e2e/...
+
+test-e2e-race:
+	@echo "Running E2E tests with race detection..."
+	go test -race -v ./test/e2e/...
+
+test-e2e-coverage:
+	@echo "Running E2E tests with coverage..."
+	go test -cover -v ./test/e2e/...

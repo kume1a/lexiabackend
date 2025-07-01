@@ -47,7 +47,7 @@ func RegisterCustomValidations(v *validator.Validate) {
 	v.RegisterValidation("strong_password", ValidateStrongPassword)
 }
 
-func ValidateStruct(s interface{}) *ValidationErrorResponse {
+func ValidateStruct(s any) *ValidationErrorResponse {
 	validate := validator.New()
 	RegisterCustomValidations(validate)
 
@@ -74,7 +74,7 @@ func ValidateStruct(s interface{}) *ValidationErrorResponse {
 	}
 }
 
-func BindAndValidate(c *gin.Context, obj interface{}) *ValidationErrorResponse {
+func BindAndValidate(c *gin.Context, obj any) *ValidationErrorResponse {
 	if err := c.ShouldBindJSON(obj); err != nil {
 		return handleBindingError(err)
 	}

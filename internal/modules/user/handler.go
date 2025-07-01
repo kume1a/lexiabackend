@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func handleUpdateUser(apiCfg *shared.ApiConfig) gin.HandlerFunc {
+func handleUpdateAuthUser(apiCfg *shared.ApiConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authPayload, err := shared.GetAuthPayload(c)
 		if err != nil {

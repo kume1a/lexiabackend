@@ -28,7 +28,5 @@ func InitializeDatabase() (*ent.Client, error) {
 		return nil, err
 	}
 
-	defer client.Close()
-
 	return client, nil
 }

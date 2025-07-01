@@ -26,6 +26,8 @@ func main() {
 		panic(err)
 	}
 
+	defer db.Close()
+
 	resouceConfig := &shared.ResourceConfig{
 		DB: db,
 	}

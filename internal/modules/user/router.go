@@ -10,6 +10,6 @@ func Router(apiCfg *shared.ApiConfig, rg *gin.RouterGroup) {
 	userGroup := rg.Group("/user")
 	{
 		userGroup.GET("/auth", handleGetAuthUser(apiCfg))
-		userGroup.PUT("/", handleUpdateUser(apiCfg))
+		userGroup.PUT("/auth", handleUpdateAuthUser(apiCfg))
 	}
 }
