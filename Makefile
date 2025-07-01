@@ -33,8 +33,14 @@ migration-apply:
 		--dir "file://ent/migrate/migrations" \
 		--url ${DB_CONNECTION_URL}
 
+migration-reset:
+	atlas migrate down \
+		--dir "file://ent/migrate/migrations" \
+		--url ${DB_CONNECTION_URL} \
+		--to-version 0
+
 migration-create:
-	atlas migrate diff init \
+	atlas migrate diff m \
 		--dir "file://ent/migrate/migrations" \
 		--to "ent://ent/schema" \
 		--dev-url "docker://postgres/15/test?search_path=public"
@@ -51,6 +57,11 @@ help:
 	@echo "  make build            Build the binary"
 	@echo "  make clean            Clean up tmp files and binaries"
 	@echo "  make docker-dev       Run the development Docker Compose file"
+	@echo "  make schemagen        Generate Ent schema files"
+	@echo "  make migration-status Check migration status"
+	@echo "  make migration-apply  Apply pending migrations"
+	@echo "  make migration-reset  Reset all migrations"
+	@echo "  make migration-create Create a new migration"
 	@echo "  make test-e2e         Run all end-to-end tests"
 	@echo "  make test-e2e-race    Run e2e tests with race detection"
 	@echo "  make test-e2e-coverage Run e2e tests with coverage"

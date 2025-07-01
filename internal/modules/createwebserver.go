@@ -3,6 +3,7 @@ package modules
 import (
 	"lexia/internal/logger"
 	"lexia/internal/modules/auth"
+	"lexia/internal/modules/folder"
 	"lexia/internal/modules/user"
 	"lexia/internal/shared"
 
@@ -57,6 +58,7 @@ func CreateWebserver(apiCfg *shared.ApiConfig) (*gin.Engine, error) {
 		protected.Use(shared.AuthMW())
 		{
 			user.Router(apiCfg, protected)
+			folder.Router(apiCfg, protected)
 		}
 	}
 

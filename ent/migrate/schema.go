@@ -15,7 +15,9 @@ var (
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
 		{Name: "word_count", Type: field.TypeInt32},
-		{Name: "language_from", Type: field.TypeEnum, Enums: []string{"ENGLISH", "GEORGIAN"}},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"FOLDER_COLLECTION", "WORD_COLLECTION"}, Default: "WORD_COLLECTION"},
+		{Name: "language_from", Type: field.TypeEnum, Nullable: true, Enums: []string{"ENGLISH", "GEORGIAN"}},
+		{Name: "language_to", Type: field.TypeEnum, Nullable: true, Enums: []string{"ENGLISH", "GEORGIAN"}},
 		{Name: "user_folders", Type: field.TypeUUID, Nullable: true},
 	}
 	// FoldersTable holds the schema information for the "folders" table.
@@ -26,7 +28,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "folders_users_folders",
-				Columns:    []*schema.Column{FoldersColumns[6]},
+				Columns:    []*schema.Column{FoldersColumns[8]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -77,15 +79,43 @@ var (
 			},
 		},
 	}
+	// FolderSubfoldersColumns holds the columns for the "folder_subfolders" table.
+	FolderSubfoldersColumns = []*schema.Column{
+		{Name: "folder_id", Type: field.TypeUUID},
+		{Name: "parent_id", Type: field.TypeUUID},
+	}
+	// FolderSubfoldersTable holds the schema information for the "folder_subfolders" table.
+	FolderSubfoldersTable = &schema.Table{
+		Name:       "folder_subfolders",
+		Columns:    FolderSubfoldersColumns,
+		PrimaryKey: []*schema.Column{FolderSubfoldersColumns[0], FolderSubfoldersColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "folder_subfolders_folder_id",
+				Columns:    []*schema.Column{FolderSubfoldersColumns[0]},
+				RefColumns: []*schema.Column{FoldersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "folder_subfolders_parent_id",
+				Columns:    []*schema.Column{FolderSubfoldersColumns[1]},
+				RefColumns: []*schema.Column{FoldersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		FoldersTable,
 		UsersTable,
 		WordsTable,
+		FolderSubfoldersTable,
 	}
 )
 
 func init() {
 	FoldersTable.ForeignKeys[0].RefTable = UsersTable
 	WordsTable.ForeignKeys[0].RefTable = FoldersTable
+	FolderSubfoldersTable.ForeignKeys[0].RefTable = FoldersTable
+	FolderSubfoldersTable.ForeignKeys[1].RefTable = FoldersTable
 }

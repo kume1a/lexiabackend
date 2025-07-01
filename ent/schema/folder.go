@@ -19,7 +19,17 @@ func (Folder) Fields() []ent.Field {
 		field.String("name").
 			NotEmpty(),
 		field.Int32("wordCount"),
-		field.Enum("languageFrom").GoType(Language("")),
+		field.Enum("type").
+			GoType(FolderType("")).
+			Default(string(FolderTypeWordCollection)),
+		field.Enum("languageFrom").
+			GoType(Language("")).
+			Optional().
+			Nillable(),
+		field.Enum("languageTo").
+			GoType(Language("")).
+			Optional().
+			Nillable(),
 	}
 }
 
@@ -29,6 +39,8 @@ func (Folder) Edges() []ent.Edge {
 			Ref("folders").
 			Unique(),
 		edge.To("words", Word.Type),
+		edge.To("subfolders", Folder.Type).
+			From("parent"),
 	}
 }
 
