@@ -125,6 +125,33 @@ func GetRootFolders(ctx context.Context, db *ent.Client, userID uuid.UUID) ([]*e
 		All(ctx)
 }
 
+func GetFoldersByParentID(
+	ctx context.Context,
+	db *ent.Client,
+	parentFolderID uuid.UUID,
+	userID uuid.UUID,
+) ([]*ent.Folder, error) {
+	parentFolder, err := db.Folder.Query().
+		Where(folder.ID(parentFolderID)).
+		WithUser().
+		Only(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("parent folder not found: %w", err)
+	}
+
+	if parentFolder.Edges.User.ID != userID {
+		return nil, fmt.Errorf("parent folder does not belong to user")
+	}
+
+	return db.Folder.Query().
+		Where(folder.HasParentWith(folder.ID(parentFolderID))).
+		WithWords().
+		WithSubfolders(func(q *ent.FolderQuery) {
+			q.WithWords()
+		}).
+		All(ctx)
+}
+
 func UpdateFolder(ctx context.Context, db *ent.Client, args UpdateFolderArgs) (*ent.Folder, error) {
 	existingFolder, err := db.Folder.Query().
 		Where(folder.ID(args.FolderID)).

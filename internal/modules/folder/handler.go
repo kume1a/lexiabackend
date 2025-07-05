@@ -123,6 +123,36 @@ func handleGetRootFolders(apiCfg *shared.ApiConfig) gin.HandlerFunc {
 	}
 }
 
+func handleGetSubfoldersByFolderID(apiCfg *shared.ApiConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authPayload, err := shared.GetAuthPayload(c)
+		if err != nil {
+			shared.ResUnauthorized(c, err.Error())
+			return
+		}
+
+		parentFolderIDStr := c.Param("folderId")
+		parentFolderID, err := uuid.Parse(parentFolderIDStr)
+		if err != nil {
+			shared.ResBadRequest(c, "Invalid folder ID")
+			return
+		}
+
+		folders, err := GetFoldersByParentID(c.Request.Context(), apiCfg.DB, parentFolderID, authPayload.UserID)
+		if err != nil {
+			shared.ResNotFound(c, "Parent folder not found or access denied")
+			return
+		}
+
+		folderDTOs := make([]FolderDTO, len(folders))
+		for i, folder := range folders {
+			folderDTOs[i] = FolderEntityToDto(folder)
+		}
+
+		shared.ResOK(c, folderDTOs)
+	}
+}
+
 func handleUpdateFolder(apiCfg *shared.ApiConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authPayload, err := shared.GetAuthPayload(c)

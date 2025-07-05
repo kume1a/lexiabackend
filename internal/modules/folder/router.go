@@ -12,6 +12,7 @@ func Router(apiCfg *shared.ApiConfig, rg *gin.RouterGroup) {
 		folderGroup.GET("", handleGetUserFolders(apiCfg))
 		folderGroup.GET("/root", handleGetRootFolders(apiCfg))
 		folderGroup.GET("/:folderId", handleGetFolder(apiCfg))
+		folderGroup.GET("/:folderId/subfolders", handleGetSubfoldersByFolderID(apiCfg))
 
 		folderGroup.POST("", handleCreateFolder(apiCfg))
 
