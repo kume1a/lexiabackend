@@ -16,8 +16,8 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "word_count", Type: field.TypeInt32},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"FOLDER_COLLECTION", "WORD_COLLECTION"}, Default: "WORD_COLLECTION"},
-		{Name: "language_from", Type: field.TypeEnum, Nullable: true, Enums: []string{"ENGLISH", "GEORGIAN"}},
-		{Name: "language_to", Type: field.TypeEnum, Nullable: true, Enums: []string{"ENGLISH", "GEORGIAN"}},
+		{Name: "language_from", Type: field.TypeEnum, Nullable: true, Enums: []string{"ENGLISH", "GEORGIAN", "SPANISH", "FRENCH", "GERMAN", "RUSSIAN", "JAPANESE", "CHINESE"}},
+		{Name: "language_to", Type: field.TypeEnum, Nullable: true, Enums: []string{"ENGLISH", "GEORGIAN", "SPANISH", "FRENCH", "GERMAN", "RUSSIAN", "JAPANESE", "CHINESE"}},
 		{Name: "user_folders", Type: field.TypeUUID, Nullable: true},
 	}
 	// FoldersTable holds the schema information for the "folders" table.

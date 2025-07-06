@@ -5,10 +5,25 @@ type Language string
 const (
 	LanguageEnglish  Language = "ENGLISH"
 	LanguageGeorgian Language = "GEORGIAN"
+	LanguageSpanish  Language = "SPANISH"
+	LanguageFrench   Language = "FRENCH"
+	LanguageGerman   Language = "GERMAN"
+	LanguageRussian  Language = "RUSSIAN"
+	LanguageJapanese Language = "JAPANESE"
+	LanguageChinese  Language = "CHINESE"
 )
 
 func (Language) Values() (kinds []string) {
-	for _, s := range []Language{LanguageEnglish, LanguageGeorgian} {
+	for _, s := range []Language{
+		LanguageEnglish,
+		LanguageGeorgian,
+		LanguageSpanish,
+		LanguageFrench,
+		LanguageGerman,
+		LanguageRussian,
+		LanguageJapanese,
+		LanguageChinese,
+	} {
 		kinds = append(kinds, string(s))
 	}
 	return

@@ -4,6 +4,7 @@ import (
 	"lexia/internal/logger"
 	"lexia/internal/modules/auth"
 	"lexia/internal/modules/folder"
+	"lexia/internal/modules/translate"
 	"lexia/internal/modules/user"
 	"lexia/internal/modules/word"
 	"lexia/internal/shared"
@@ -61,6 +62,7 @@ func CreateWebserver(apiCfg *shared.ApiConfig) (*gin.Engine, error) {
 			user.Router(apiCfg, protected)
 			folder.Router(apiCfg, protected)
 			word.Router(apiCfg, protected)
+			translate.Router(apiCfg, protected)
 		}
 	}
 
