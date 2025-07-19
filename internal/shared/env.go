@@ -16,6 +16,7 @@ const (
 	EnvDbConnectionString    = "DB_CONNECTION_STRING"
 	EnvAccessTokenSecret     = "ACCESS_TOKEN_SECRET"
 	EnvAccessTokenExpSeconds = "ACCESS_TOKEN_EXP_SECONDS"
+	EnvGoogleCloudProjectID  = "GOOGLE_CLOUD_PROJECT_ID"
 )
 
 func LoadEnv() {
@@ -40,6 +41,7 @@ type EnvVariables struct {
 	DbConnectionString    string
 	AccessTokenSecret     string
 	AccessTokenExpSeconds int64
+	GoogleCloudProjectID  string
 }
 
 func ParseEnv() (*EnvVariables, error) {
@@ -68,6 +70,11 @@ func ParseEnv() (*EnvVariables, error) {
 		return nil, err
 	}
 
+	googleCloudProjectID, err := getEnv(EnvGoogleCloudProjectID)
+	if err != nil {
+		return nil, err
+	}
+
 	return &EnvVariables{
 		IsDevelopment:         environment == "development",
 		IsProduction:          environment == "production",
@@ -75,6 +82,7 @@ func ParseEnv() (*EnvVariables, error) {
 		DbConnectionString:    dbConnectionString,
 		AccessTokenSecret:     accessTokenSecret,
 		AccessTokenExpSeconds: accessTokenExpSeconds,
+		GoogleCloudProjectID:  googleCloudProjectID,
 	}, nil
 }
 

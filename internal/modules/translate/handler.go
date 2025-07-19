@@ -1,6 +1,7 @@
 package translate
 
 import (
+	"fmt"
 	"lexia/internal/shared"
 
 	"github.com/gin-gonic/gin"
@@ -25,9 +26,31 @@ func handleTranslate(_ *shared.ApiConfig) gin.HandlerFunc {
 			return
 		}
 
+		supportedLanguages := GetSupportedLanguages()
+		isFromSupported := false
+		isToSupported := false
+
+		for _, lang := range supportedLanguages {
+			if lang == body.LanguageFrom {
+				isFromSupported = true
+			}
+			if lang == body.LanguageTo {
+				isToSupported = true
+			}
+		}
+
+		if !isFromSupported {
+			shared.ResBadRequest(c, fmt.Sprintf("Source language '%s' is not supported", body.LanguageFrom))
+			return
+		}
+
+		if !isToSupported {
+			shared.ResBadRequest(c, fmt.Sprintf("Target language '%s' is not supported", body.LanguageTo))
+			return
+		}
+
 		translations, err := TranslateText(c.Request.Context(), body.Text, body.LanguageFrom, body.LanguageTo)
 		if err != nil {
-			// Handle custom translation errors
 			if translationErr, ok := err.(*TranslationError); ok {
 				switch translationErr.Code {
 				case "EMPTY_TEXT", "SAME_LANGUAGE", "TEXT_TOO_LONG":
@@ -59,7 +82,7 @@ func handleTranslate(_ *shared.ApiConfig) gin.HandlerFunc {
 	}
 }
 
-func handleDetectLanguage(apiCfg *shared.ApiConfig) gin.HandlerFunc {
+func handleDetectLanguage(_ *shared.ApiConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		_, err := shared.GetAuthPayload(c)
 		if err != nil {
@@ -73,10 +96,8 @@ func handleDetectLanguage(apiCfg *shared.ApiConfig) gin.HandlerFunc {
 			return
 		}
 
-		// Detect language
 		detectedLang, confidence, err := DetectLanguage(c.Request.Context(), body.Text)
 		if err != nil {
-			// Handle custom translation errors
 			if translationErr, ok := err.(*TranslationError); ok {
 				switch translationErr.Code {
 				case "EMPTY_TEXT", "TEXT_TOO_LONG":
@@ -107,7 +128,7 @@ func handleDetectLanguage(apiCfg *shared.ApiConfig) gin.HandlerFunc {
 	}
 }
 
-func handleGetSupportedLanguages(apiCfg *shared.ApiConfig) gin.HandlerFunc {
+func handleGetSupportedLanguages(_ *shared.ApiConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		_, err := shared.GetAuthPayload(c)
 		if err != nil {

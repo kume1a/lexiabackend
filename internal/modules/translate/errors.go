@@ -5,7 +5,6 @@ import (
 	"fmt"
 )
 
-// Translation service specific errors
 var (
 	ErrEmptyText               = errors.New("text cannot be empty")
 	ErrSameLanguage            = errors.New("source and target languages cannot be the same")
@@ -16,7 +15,6 @@ var (
 	ErrGoogleCredentials       = errors.New("Google Cloud credentials not configured")
 )
 
-// TranslationError represents a structured error for translation operations
 type TranslationError struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
@@ -30,7 +28,6 @@ func (e *TranslationError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Code, e.Message)
 }
 
-// NewTranslationError creates a new TranslationError
 func NewTranslationError(code, message, details string) *TranslationError {
 	return &TranslationError{
 		Code:    code,
@@ -39,7 +36,6 @@ func NewTranslationError(code, message, details string) *TranslationError {
 	}
 }
 
-// Common error constructors
 func NewUnsupportedLanguageError(lang string) *TranslationError {
 	return NewTranslationError(
 		"UNSUPPORTED_LANGUAGE",

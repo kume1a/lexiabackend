@@ -5,7 +5,7 @@ import (
 )
 
 type TranslateRequestDTO struct {
-	Text         string          `json:"text" validate:"required,min=1,max=1000"`
+	Text         string          `json:"text" validate:"required,min=1,max=5000"`
 	LanguageFrom schema.Language `json:"languageFrom" validate:"required"`
 	LanguageTo   schema.Language `json:"languageTo" validate:"required"`
 }
@@ -23,7 +23,7 @@ type TranslateResponseDTO struct {
 }
 
 type DetectLanguageRequestDTO struct {
-	Text string `json:"text" validate:"required,min=1,max=1000"`
+	Text string `json:"text" validate:"required,min=1,max=5000"`
 }
 
 type DetectLanguageResponseDTO struct {
