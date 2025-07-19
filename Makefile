@@ -2,7 +2,7 @@ APP_NAME = lexia
 MAIN = ./main.go
 BUILD_DIR = bin
 
-include .env.development
+-include .env.development
 
 test:
 	echo ${DB_CONNECTION_STRING}

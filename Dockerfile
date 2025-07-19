@@ -1,4 +1,4 @@
-FROM golang:1.24.3-alpine@sha256:ef18ee7117463ac1055f5a370ed18b8750f01589f13ea0b48642f5792b234044 AS builder
+FROM golang:1.24.3-alpine AS builder
 
 WORKDIR /app
 
@@ -7,18 +7,29 @@ RUN go mod download
 
 COPY *.go ./
 COPY ./internal ./internal
+COPY ./ent ./ent
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /lexiabin
 
-FROM alpine:3.21@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c
+FROM alpine:3.21
 
 WORKDIR /app
-
-COPY --from=builder /lexiabin /lexiabin
-
-EXPOSE 8002
 
 ENV ENVIRONMENT=production
 ENV PATH="/root/.local/bin:$PATH"
 
-CMD ["/lexiabin"]
+ARG DB_CONNECTION_URL
+ENV DB_CONNECTION_URL=${DB_CONNECTION_URL}
+
+COPY --from=builder /lexiabin /lexiabin
+COPY --from=builder /app/ent/migrate/migrations ./ent/migrate/migrations
+COPY Makefile ./
+
+EXPOSE 8002
+
+RUN apk add --no-cache curl make && \
+    curl -sSf https://atlasgo.sh | sh
+
+# ENTRYPOINT ["tail", "-f", "/dev/null"]
+
+CMD ["/bin/sh", "-c", "make migration-apply && /lexiabin"]

@@ -8,8 +8,8 @@ services:
     ports:
       - "5437:5432"
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_USERNAME: ${POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_USER: "${POSTGRES_USER}"
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - lexia_postgres_data:/var/lib/postgresql/data
@@ -28,6 +28,14 @@ services:
     environment:
       ENVIRONMENT: ${ENVIRONMENT}
       PORT: ${PORT}
+      DB_CONNECTION_URL: ${DB_CONNECTION_URL}
+      DB_CONNECTION_STRING: ${DB_CONNECTION_STRING}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET}
+      ACCESS_TOKEN_EXP_SECONDS: ${ACCESS_TOKEN_EXP_SECONDS}
+      GOOGLE_CLOUD_PROJECT_ID: ${GOOGLE_CLOUD_PROJECT_ID}
     ports:
-      - "8002:8002"
+      - "${PORT}:${PORT}"
     restart: unless-stopped
