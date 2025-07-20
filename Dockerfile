@@ -9,6 +9,11 @@ COPY *.go ./
 COPY ./internal ./internal
 COPY ./ent ./ent
 
+RUN apk add --no-cache curl make && \
+    curl -sSf https://atlasgo.sh | sh
+
+RUN make schemagen
+
 RUN CGO_ENABLED=0 GOOS=linux go build -o /lexiabin
 
 FROM alpine:3.21
