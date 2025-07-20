@@ -123,7 +123,15 @@ func createTranslateClient(ctx context.Context) (*translate.Client, error) {
 		return nil, NewCredentialsError()
 	}
 
-	client, err := translate.NewClient(ctx, option.WithQuotaProject(envVars.GoogleCloudProjectID))
+	var clientOptions []option.ClientOption
+
+	clientOptions = append(clientOptions, option.WithQuotaProject(envVars.GoogleCloudProjectID))
+
+	if envVars.GoogleServiceAccountKeyPath != "" {
+		clientOptions = append(clientOptions, option.WithCredentialsFile(envVars.GoogleServiceAccountKeyPath))
+	}
+
+	client, err := translate.NewClient(ctx, clientOptions...)
 	if err != nil {
 		return nil, NewCredentialsError()
 	}
@@ -181,11 +189,9 @@ func performTranslationWithRetry(
 	return nil, NewTranslationFailedError(fmt.Sprintf("Google Translate API error after %d attempts: %v", args.maxRetries, lastErr))
 }
 
-// isRetryableError determines if an error is worth retrying
 func isRetryableError(err error) bool {
 	errorStr := strings.ToLower(err.Error())
 
-	// Retry on temporary network issues, rate limits, and server errors
 	retryableErrors := []string{
 		"timeout",
 		"connection",
@@ -369,7 +375,6 @@ func generateAlternativeTranslations(ctx context.Context, client *translate.Clie
 	return variants, nil
 }
 
-// isTextSimilar checks if two texts are too similar to be considered alternatives
 func isTextSimilar(text1, text2 string) bool {
 	text1 = strings.ToLower(strings.TrimSpace(text1))
 	text2 = strings.ToLower(strings.TrimSpace(text2))
@@ -455,7 +460,6 @@ func generateRegionalVariant(text string, lang language.Tag) string {
 	}
 }
 
-// generateSimplifiedVariant creates a simplified variant for complex texts
 func generateSimplifiedVariant(text string) string {
 	// Simple approach - in production, you might use NLP techniques
 	return fmt.Sprintf("%s (simplified)", text)
@@ -607,7 +611,6 @@ func mapGoogleCodeToLanguage(langTag language.Tag) (schema.Language, error) {
 	}
 }
 
-// GetSupportedLanguages returns all supported languages for translation
 func GetSupportedLanguages() []schema.Language {
 	return []schema.Language{
 		schema.LanguageEnglish,

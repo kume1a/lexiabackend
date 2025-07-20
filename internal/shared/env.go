@@ -11,12 +11,13 @@ import (
 )
 
 const (
-	EnvEnvironment           = "ENVIRONMENT"
-	EnvPort                  = "PORT"
-	EnvDbConnectionString    = "DB_CONNECTION_STRING"
-	EnvAccessTokenSecret     = "ACCESS_TOKEN_SECRET"
-	EnvAccessTokenExpSeconds = "ACCESS_TOKEN_EXP_SECONDS"
-	EnvGoogleCloudProjectID  = "GOOGLE_CLOUD_PROJECT_ID"
+	EnvEnvironment                 = "ENVIRONMENT"
+	EnvPort                        = "PORT"
+	EnvDbConnectionString          = "DB_CONNECTION_STRING"
+	EnvAccessTokenSecret           = "ACCESS_TOKEN_SECRET"
+	EnvAccessTokenExpSeconds       = "ACCESS_TOKEN_EXP_SECONDS"
+	EnvGoogleCloudProjectID        = "GOOGLE_CLOUD_PROJECT_ID"
+	EnvGoogleServiceAccountKeyPath = "GOOGLE_SERVICE_ACCOUNT_KEY_PATH"
 )
 
 func LoadEnv() {
@@ -35,13 +36,14 @@ func LoadEnv() {
 }
 
 type EnvVariables struct {
-	IsDevelopment         bool
-	IsProduction          bool
-	Port                  string
-	DbConnectionString    string
-	AccessTokenSecret     string
-	AccessTokenExpSeconds int64
-	GoogleCloudProjectID  string
+	IsDevelopment               bool
+	IsProduction                bool
+	Port                        string
+	DbConnectionString          string
+	AccessTokenSecret           string
+	AccessTokenExpSeconds       int64
+	GoogleCloudProjectID        string
+	GoogleServiceAccountKeyPath string
 }
 
 func ParseEnv() (*EnvVariables, error) {
@@ -75,14 +77,17 @@ func ParseEnv() (*EnvVariables, error) {
 		return nil, err
 	}
 
+	googleServiceAccountKeyPath := os.Getenv(EnvGoogleServiceAccountKeyPath)
+
 	return &EnvVariables{
-		IsDevelopment:         environment == "development",
-		IsProduction:          environment == "production",
-		Port:                  port,
-		DbConnectionString:    dbConnectionString,
-		AccessTokenSecret:     accessTokenSecret,
-		AccessTokenExpSeconds: accessTokenExpSeconds,
-		GoogleCloudProjectID:  googleCloudProjectID,
+		IsDevelopment:               environment == "development",
+		IsProduction:                environment == "production",
+		Port:                        port,
+		DbConnectionString:          dbConnectionString,
+		AccessTokenSecret:           accessTokenSecret,
+		AccessTokenExpSeconds:       accessTokenExpSeconds,
+		GoogleCloudProjectID:        googleCloudProjectID,
+		GoogleServiceAccountKeyPath: googleServiceAccountKeyPath,
 	}, nil
 }
 
