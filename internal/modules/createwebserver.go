@@ -13,7 +13,10 @@ import (
 )
 
 func HealthcheckHandler(c *gin.Context) {
-	shared.ResOK(c, shared.OkDTO{Ok: true})
+	shared.ResOK(c, map[string]any{
+		"status":     "ok",
+		"serverName": "Lexia Backend",
+	})
 }
 
 func CORSMiddleware() gin.HandlerFunc {
