@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"lexia/ent"
 	"lexia/ent/folder"
+	"lexia/ent/user"
 	"lexia/ent/word"
 	"log"
 
@@ -202,4 +203,42 @@ func DeleteWord(
 	}
 
 	return nil
+}
+
+func CheckWordDuplicate(
+	ctx context.Context,
+	db *ent.Client,
+	text string,
+	userID uuid.UUID,
+) (*ent.Word, error) {
+	wordEntity, err := db.Word.Query().
+		Where(
+			word.Text(text),
+			word.HasFolderWith(folder.HasUserWith(user.ID(userID))),
+		).
+		WithFolder(func(q *ent.FolderQuery) {
+			q.WithUser().
+				WithParent(func(pq *ent.FolderQuery) {
+					pq.WithParent(func(ppq *ent.FolderQuery) {
+						ppq.WithParent(func(pppq *ent.FolderQuery) {
+							pppq.WithParent(func(pppq *ent.FolderQuery) {
+								pppq.WithParent(func(pppq *ent.FolderQuery) {
+									pppq.WithParent()
+								})
+							})
+						})
+					})
+				})
+		}).First(ctx)
+
+	if ent.IsNotFound(err) {
+		return nil, nil
+	}
+
+	if err != nil {
+		log.Println("Error checking word duplicate: ", err)
+		return nil, err
+	}
+
+	return wordEntity, nil
 }
