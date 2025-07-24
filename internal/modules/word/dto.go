@@ -37,3 +37,22 @@ type WordWithFolderDTO struct {
 		Name string    `json:"name"`
 	} `json:"folder"`
 }
+
+type WordDuplicateCheckDTO struct {
+	IsDuplicate bool                   `json:"isDuplicate"`
+	Word        *WordWithFolderPathDTO `json:"word,omitempty"`
+}
+
+type WordWithFolderPathDTO struct {
+	ID         uuid.UUID           `json:"id"`
+	CreatedAt  time.Time           `json:"createdAt"`
+	UpdatedAt  time.Time           `json:"updatedAt"`
+	Text       string              `json:"text"`
+	Definition string              `json:"definition"`
+	FolderPath []FolderPathItemDTO `json:"folderPath"`
+}
+
+type FolderPathItemDTO struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+}

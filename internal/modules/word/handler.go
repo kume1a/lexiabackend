@@ -175,3 +175,42 @@ func handleDeleteWord(apiCfg *shared.ApiConfig) gin.HandlerFunc {
 		c.JSON(http.StatusNoContent, nil)
 	}
 }
+
+func handleCheckWordDuplicate(apiCfg *shared.ApiConfig) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authPayload, err := shared.GetAuthPayload(c)
+		if err != nil {
+			shared.ResUnauthorized(c, err.Error())
+			return
+		}
+
+		text := c.Query("text")
+		if text == "" {
+			shared.ResBadRequest(c, "Text parameter is required")
+			return
+		}
+
+		duplicateWord, err := CheckWordDuplicate(
+			c.Request.Context(),
+			apiCfg.DB,
+			text,
+			authPayload.UserID,
+		)
+
+		if err != nil {
+			shared.ResInternalServerErrorDef(c)
+			return
+		}
+
+		response := WordDuplicateCheckDTO{
+			IsDuplicate: duplicateWord != nil,
+		}
+
+		if duplicateWord != nil {
+			wordDTO := WordEntityWithFolderPathToDTO(duplicateWord)
+			response.Word = &wordDTO
+		}
+
+		shared.ResOK(c, response)
+	}
+}

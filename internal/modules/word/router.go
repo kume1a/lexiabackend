@@ -13,6 +13,7 @@ func Router(apiCfg *shared.ApiConfig, rg *gin.RouterGroup) {
 		wordGroup.GET("/:wordId", handleGetWord(apiCfg))
 		wordGroup.PUT("/:wordId", handleUpdateWord(apiCfg))
 		wordGroup.DELETE("/:wordId", handleDeleteWord(apiCfg))
+		wordGroup.GET("/check-duplicate", handleCheckWordDuplicate(apiCfg))
 	}
 
 	folderGroup := rg.Group("/folders")

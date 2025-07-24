@@ -46,3 +46,39 @@ func WordEntitiesToDTOs(wordEntities []*ent.Word) []WordDTO {
 	}
 	return dtos
 }
+
+func buildFolderPath(folder *ent.Folder) []FolderPathItemDTO {
+	var path []FolderPathItemDTO
+	current := folder
+
+	for current != nil {
+		path = append([]FolderPathItemDTO{{
+			ID:   current.ID,
+			Name: current.Name,
+		}}, path...)
+
+		if current.Edges.Parent != nil && len(current.Edges.Parent) > 0 {
+			current = current.Edges.Parent[0]
+		} else {
+			current = nil
+		}
+	}
+
+	return path
+}
+
+func WordEntityWithFolderPathToDTO(wordEntity *ent.Word) WordWithFolderPathDTO {
+	dto := WordWithFolderPathDTO{
+		ID:         wordEntity.ID,
+		CreatedAt:  wordEntity.CreateTime,
+		UpdatedAt:  wordEntity.UpdateTime,
+		Text:       wordEntity.Text,
+		Definition: wordEntity.Definition,
+	}
+
+	if wordEntity.Edges.Folder != nil {
+		dto.FolderPath = buildFolderPath(wordEntity.Edges.Folder)
+	}
+
+	return dto
+}

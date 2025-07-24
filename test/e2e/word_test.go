@@ -691,3 +691,196 @@ func (suite *WordTestSuite) TestBulkWordOperations() {
 	assert.NoError(suite.T(), err)
 	assert.Len(suite.T(), finalWordsResponse, 0)
 }
+
+func (suite *WordTestSuite) TestCheckWordDuplicate() {
+	folderID := suite.createTestFolder()
+
+	// Create a word
+	wordPayload := map[string]interface{}{
+		"text":       "hello",
+		"definition": "a greeting",
+		"folderId":   folderID,
+	}
+
+	wordResp := suite.httpClient.POST("/api/v1/words", wordPayload, suite.getAuthHeaders())
+	assert.Equal(suite.T(), http.StatusCreated, wordResp.StatusCode)
+
+	suite.T().Run("should find duplicate word", func(t *testing.T) {
+		// Check for duplicate
+		resp := suite.httpClient.GET("/api/v1/words/check-duplicate?text=hello", suite.getAuthHeaders())
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var result map[string]interface{}
+		err := resp.ParseJSON(&result)
+		assert.NoError(t, err)
+
+		assert.True(t, result["isDuplicate"].(bool))
+		assert.NotNil(t, result["word"])
+
+		word := result["word"].(map[string]interface{})
+		assert.Equal(t, "hello", word["text"])
+		assert.Equal(t, "a greeting", word["definition"])
+		assert.NotEmpty(t, word["folderPath"])
+
+		folderPath := word["folderPath"].([]interface{})
+		assert.Len(t, folderPath, 1)
+
+		folder := folderPath[0].(map[string]interface{})
+		assert.Equal(t, "Test Vocabulary Folder", folder["name"])
+	})
+
+	suite.T().Run("should not find duplicate for non-existent word", func(t *testing.T) {
+		// Check for non-existent word
+		resp := suite.httpClient.GET("/api/v1/words/check-duplicate?text=nonexistent", suite.getAuthHeaders())
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+		var result map[string]interface{}
+		err := resp.ParseJSON(&result)
+		assert.NoError(t, err)
+
+		assert.False(t, result["isDuplicate"].(bool))
+		assert.Nil(t, result["word"])
+	})
+
+	suite.T().Run("should return bad request when text parameter is missing", func(t *testing.T) {
+		resp := suite.httpClient.GET("/api/v1/words/check-duplicate", suite.getAuthHeaders())
+		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+	})
+
+	suite.T().Run("should return unauthorized when no auth token", func(t *testing.T) {
+		resp := suite.httpClient.GET("/api/v1/words/check-duplicate?text=hello")
+		assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+	})
+}
+
+func (suite *WordTestSuite) TestCheckWordDuplicateWithNestedFolders() {
+	// Create parent folder
+	parentFolderData := map[string]interface{}{
+		"name": "Parent Folder",
+		"type": "FOLDER_COLLECTION",
+	}
+
+	parentResp := suite.httpClient.POST("/api/v1/folders", parentFolderData, suite.getAuthHeaders())
+	assert.Equal(suite.T(), http.StatusOK, parentResp.StatusCode)
+
+	var parentFolderResult map[string]interface{}
+	err := parentResp.ParseJSON(&parentFolderResult)
+	assert.NoError(suite.T(), err)
+	parentFolderID := parentFolderResult["id"].(string)
+
+	// Create child folder
+	childFolderData := map[string]interface{}{
+		"name":         "Child Folder",
+		"type":         "WORD_COLLECTION",
+		"languageFrom": "ENGLISH",
+		"languageTo":   "SPANISH",
+		"parentId":     parentFolderID,
+	}
+
+	childResp := suite.httpClient.POST("/api/v1/folders", childFolderData, suite.getAuthHeaders())
+	assert.Equal(suite.T(), http.StatusOK, childResp.StatusCode)
+
+	var childFolderResult map[string]interface{}
+	err = childResp.ParseJSON(&childFolderResult)
+	assert.NoError(suite.T(), err)
+	childFolderID := childFolderResult["id"].(string)
+
+	// Create a word in the child folder
+	wordPayload := map[string]interface{}{
+		"text":       "nested",
+		"definition": "word in nested folder",
+		"folderId":   childFolderID,
+	}
+
+	wordResp := suite.httpClient.POST("/api/v1/words", wordPayload, suite.getAuthHeaders())
+	assert.Equal(suite.T(), http.StatusCreated, wordResp.StatusCode)
+
+	// Check for duplicate
+	resp := suite.httpClient.GET("/api/v1/words/check-duplicate?text=nested", suite.getAuthHeaders())
+	assert.Equal(suite.T(), http.StatusOK, resp.StatusCode)
+
+	var result map[string]interface{}
+	err = resp.ParseJSON(&result)
+	assert.NoError(suite.T(), err)
+
+	assert.True(suite.T(), result["isDuplicate"].(bool))
+	assert.NotNil(suite.T(), result["word"])
+
+	word := result["word"].(map[string]interface{})
+	assert.Equal(suite.T(), "nested", word["text"])
+	assert.Equal(suite.T(), "word in nested folder", word["definition"])
+
+	folderPath := word["folderPath"].([]interface{})
+	assert.Len(suite.T(), folderPath, 2) // Should show parent -> child path
+
+	// First folder should be parent
+	parentFolder := folderPath[0].(map[string]interface{})
+	assert.Equal(suite.T(), "Parent Folder", parentFolder["name"])
+	assert.Equal(suite.T(), parentFolderID, parentFolder["id"])
+
+	// Second folder should be child
+	childFolder := folderPath[1].(map[string]interface{})
+	assert.Equal(suite.T(), "Child Folder", childFolder["name"])
+	assert.Equal(suite.T(), childFolderID, childFolder["id"])
+}
+
+func (suite *WordTestSuite) TestCheckWordDuplicateUserIsolation() {
+	// Create a word with the first user
+	folderID := suite.createTestFolder()
+	wordPayload := map[string]interface{}{
+		"text":       "isolation_test",
+		"definition": "test word for user isolation",
+		"folderId":   folderID,
+	}
+
+	wordResp := suite.httpClient.POST("/api/v1/words", wordPayload, suite.getAuthHeaders())
+	assert.Equal(suite.T(), http.StatusCreated, wordResp.StatusCode)
+
+	// Create a second user
+	user2HttpClient := helpers.NewTestHTTPClient(suite.T(), suite.GetTestServerURL())
+
+	signupData := map[string]string{
+		"email":    "user2@example.com",
+		"password": "password123",
+		"username": "testuser2",
+	}
+
+	signupResp := user2HttpClient.POST("/api/v1/auth/signup", signupData)
+	assert.Equal(suite.T(), http.StatusOK, signupResp.StatusCode)
+
+	signinData := map[string]string{
+		"email":    "user2@example.com",
+		"password": "password123",
+	}
+
+	signinResp := user2HttpClient.POST("/api/v1/auth/signin", signinData)
+	assert.Equal(suite.T(), http.StatusOK, signinResp.StatusCode)
+
+	var signinResponse map[string]interface{}
+	err := signinResp.ParseJSON(&signinResponse)
+	assert.NoError(suite.T(), err)
+	user2Token := signinResponse["accessToken"].(string)
+
+	user2Headers := map[string]string{"Authorization": user2Token}
+
+	// User 2 checks for the same word text - should not find it
+	resp := user2HttpClient.GET("/api/v1/words/check-duplicate?text=isolation_test", user2Headers)
+	assert.Equal(suite.T(), http.StatusOK, resp.StatusCode)
+
+	var result map[string]interface{}
+	err = resp.ParseJSON(&result)
+	assert.NoError(suite.T(), err)
+
+	assert.False(suite.T(), result["isDuplicate"].(bool))
+	assert.Nil(suite.T(), result["word"])
+
+	// User 1 should still find the word
+	resp = suite.httpClient.GET("/api/v1/words/check-duplicate?text=isolation_test", suite.getAuthHeaders())
+	assert.Equal(suite.T(), http.StatusOK, resp.StatusCode)
+
+	err = resp.ParseJSON(&result)
+	assert.NoError(suite.T(), err)
+
+	assert.True(suite.T(), result["isDuplicate"].(bool))
+	assert.NotNil(suite.T(), result["word"])
+}
