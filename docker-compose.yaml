@@ -5,6 +5,11 @@ services:
   lexiadb:
     image: postgres:17-alpine
     container_name: lexia_postgres
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "5437:5432"
     environment:
@@ -22,6 +27,11 @@ services:
   lexia:
     build: .
     container_name: lexia_app
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     depends_on:
       lexiadb:
         condition: service_healthy
